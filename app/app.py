@@ -1,29 +1,30 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from click import style
 from dash import Dash, html, dcc, Input, Output
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 import requests
+from flask import Flask
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = Flask(__name__)
+app = Dash(server=server, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app.title = 'F1'
 
-
-circuits = pd.read_csv('./data/circuits.csv')
-constructor_standings = pd.read_csv('./data/constructor_standings.csv')
-constructors = pd.read_csv('./data/constructors.csv')
-driver_standings = pd.read_csv('./data/driver_standings.csv')
-drivers = pd.read_csv('./data/drivers.csv')
-lap_times = pd.read_csv('./data/lap_times.csv')
-pit_stops = pd.read_csv('./data/pit_stops.csv')
-races = pd.read_csv('./data/races.csv')
-qualifying = pd.read_csv('./data/qualifying.csv')
-results = pd.read_csv('./data/results.csv')
-seasons = pd.read_csv('./data/seasons.csv')
-sprint_results = pd.read_csv('./data/sprint_results.csv')
-status = pd.read_csv('./data/status.csv')
-constructor_results = pd.read_csv('./data/constructor_results.csv')
+circuits = pd.read_csv('data/circuits.csv')
+constructor_standings = pd.read_csv('data/constructor_standings.csv')
+constructors = pd.read_csv('data/constructors.csv')
+driver_standings = pd.read_csv('data/driver_standings.csv')
+drivers = pd.read_csv('data/drivers.csv')
+lap_times = pd.read_csv('data/lap_times.csv')
+pit_stops = pd.read_csv('data/pit_stops.csv')
+races = pd.read_csv('data/races.csv')
+qualifying = pd.read_csv('data/qualifying.csv')
+results = pd.read_csv('data/results.csv')
+seasons = pd.read_csv('data/seasons.csv')
+sprint_results = pd.read_csv('data/sprint_results.csv')
+status = pd.read_csv('data/status.csv')
+constructor_results = pd.read_csv('data/constructor_results.csv')
 
 races_with_laps_and_drivers = races.merge(lap_times, on='raceId').merge(drivers, on='driverId')
 
@@ -450,13 +451,16 @@ def display_click_data(circuit):
 
     data = response.json()
 
+    text = circuit['points'][0]['hovertext']
+    icon = data['current']['icon_num']
+
     return (
         fig,
-        f'Total races: {races[races['circuitId'] == circuit_id].raceId.count()}',
-        f'{circuit['points'][0]['hovertext']}',
-        f"{base_url}/static/img/ico/weather/{data["current"]['icon_num']}.svg"
+        f'Total races: {races[races.circuitId == circuit_id].raceId.count()}',
+        f'{text}',
+        f"{base_url}/static/img/ico/weather/{icon}.svg"
     )
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()
